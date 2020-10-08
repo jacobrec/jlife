@@ -1,0 +1,75 @@
+* JLife
+  Calender, Todo list, Organizer
+  One CLI to do them all
+
+** Concepts
+*** Boards
+    Boards are seperate workspaces. 
+    Eg) I might have a School board, a SPEAR board, and a Personal Board
+    
+*** Item
+    A task, reminder, or meeting
+    
+*** Task
+    Something that gets done.
+    Eg) A bug, a feature, or a todo item
+*** Reminder
+    Something to bring to mind
+    Eg) Wish someone happy birthday
+*** Meeting
+    Somewhere I need to be. Has a start and duration
+    Eg) Exam, meeting, game, shift
+    
+*** Due/Persistant
+    Tasks and reminders can either have a due date, or be persistant.
+    Meetings are always due. Tasks will be late after the due date,
+    reminders will trigger at the due date, and meetings start at the
+    due date.
+
+*** Repetition
+    Any due item can repeat. n-days, n-weeks, n-months, and custom
+    week can be set as repetion modes. Custom weeks might be something
+    like MoWeFr, TuTh, or SaSu
+    
+** Interface
+   The idea with the cli is to be as forgiving as possible. Accept much  
+  
+** Interface Examples
+*** New items
+    =jlife task fix the stupid bug --due tomorrow@8am=
+    =jlife meeting spear leads --due th@7:30pm --repeat weekly --duration 30m=
+    =jlife reminder brush teeth --due 8:30pm --repeat daily=
+    =jlife reminder go to work --due 8:30 --repeat MoTuWeThFr=
+
+*** Remove items
+    Removes items as if they never existed
+    - can use a substring of the item, or an index
+    =jlife remove go to work=
+    =jlife rm go to work=
+    =jlife rm 1=
+*** Dismiss items
+    Completes tasks, dismisses reminders
+    - done, finish, and dismiss are interchangable
+    - can use a substring of the item, or an index
+    =jlife done go to work=
+    =jlife finish go to work=
+    =jlife dismiss 1=
+    
+*** Display items
+    - raw data :: =jlife display json=
+    - raw data :: =jlife display sexp=
+    - todo list :: =jlife display tasks=
+    - calander :: =jlife display calender=
+    - list of meetings :: =jlife display meetings=
+    - list of reminders :: =jlife display reminders=
+
+** Roadmap
+*** TODO due date parsing
+*** TODO repetition parsing
+*** TODO duration parsing
+*** TODO data structure for items
+*** TODO cli parsing for creation, dismissing, and removing
+*** TODO persistant storage
+*** TODO multiple boards
+*** TODO pretty displaying
+*** TODO eventual consistancy cloud storage
