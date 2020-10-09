@@ -30,6 +30,9 @@
     Any due item can repeat. n-days, n-weeks, n-months, and custom
     week can be set as repetion modes. Custom weeks might be something
     like MoWeFr, TuTh, or SaSu
+
+*** Notes
+    Any item can have notes associated with it
     
 ** Interface
    The idea with the cli is to be as forgiving as possible. Accept much  
@@ -63,12 +66,14 @@
     - list of meetings :: =jlife display meetings=
     - list of reminders :: =jlife display reminders=
 
-** Roadmap
-*** TODO due date parsing
+** Roadmap [18%]
+*** DONE due date parsing
 *** TODO repetition parsing
-*** TODO duration parsing
+*** DONE duration parsing
 *** TODO data structure for items
+*** TODO raw data displaying
 *** TODO cli parsing for creation, dismissing, and removing
+*** TODO cli for managing notes
 *** TODO persistant storage
 *** TODO multiple boards
 *** TODO pretty displaying
