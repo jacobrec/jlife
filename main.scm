@@ -1,6 +1,7 @@
 (define-module (jlife main)
   #:use-module (jlib parse)
   #:use-module (jlib print)
+  #:use-module (jlib numbers)
   #:use-module (srfi srfi-1))
 
 (define (parse/duration-spec)
@@ -30,8 +31,43 @@
   1)
 (define (parse/time/relativeday)
   1)
+(define (parse/time/month)
+  (parse/or
+    (parse/alias_lit "jan" "Jan" "JAN" "january" "January" "JANUARY")
+    (parse/alias_lit "feb" "Feb" "FEB" "february" "February" "FEBRUARY")
+    (parse/alias_lit "mar" "Mar" "MAR" "march" "March" "MARCH")
+    (parse/alias_lit "apr" "Apr" "APR" "april" "April" "APRIL")
+    (parse/alias_lit "may" "May" "MAY" "may" "May" "MAY")
+    (parse/alias_lit "jun" "Jun" "JUN" "june" "June" "JUNE")
+    (parse/alias_lit "jul" "Jul" "JUL" "july" "July" "JULY")
+    (parse/alias_lit "aug" "Aug" "AUG" "august" "August" "AUGUST")
+    (parse/alias_lit "sep" "Sep" "SEP" "september" "September" "SEPTEMBER")
+    (parse/alias_lit "oct" "Oct" "OCT" "october" "October" "OCTOBER")
+    (parse/alias_lit "nov" "Nov" "NOV" "november" "November" "NOVEMBER")
+    (parse/alias_lit "dec" "Dec" "DEC" "december" "December" "DECEMBER")))
+
+
 (define (parse/time/date)
-  1)
+  (parse/apply
+    (parse/and
+      (parse/time/month)
+      (parse/int))
+    (lambda (x)
+      (if (or
+           (and (string= (first x) "jan") (between? 1 (second x) 31))
+           (and (string= (first x) "feb") (between? 1 (second x) 29))
+           (and (string= (first x) "mar") (between? 1 (second x) 31))
+           (and (string= (first x) "apr") (between? 1 (second x) 30))
+           (and (string= (first x) "may") (between? 1 (second x) 31))
+           (and (string= (first x) "jun") (between? 1 (second x) 30))
+           (and (string= (first x) "jul") (between? 1 (second x) 31))
+           (and (string= (first x) "aug") (between? 1 (second x) 31))
+           (and (string= (first x) "sep") (between? 1 (second x) 30))
+           (and (string= (first x) "oct") (between? 1 (second x) 31))
+           (and (string= (first x) "nov") (between? 1 (second x) 30))
+           (and (string= (first x) "dec") (between? 1 (second x) 31)))
+          x #:parse-error))))
+
 (define (parse/time/hour)
   (parse/apply
     (parse/apply
@@ -56,17 +92,9 @@
               ((and (string= "am" (third x))) (first x)))
              (second x)))))
     (lambda (x)
-      (define (between a b c) (and (<= a b) (<= b c)))
-      (if (and (between 0 (first x) 24)
-               (between 0 (second x) 59))
+      (if (and (between? 0 (first x) 24)
+               (between? 0 (second x) 59))
        x #:parse-error))))
-
-  ; int (:int)? (am|pm)?
-  ; 8:30
-  ; 20
-  ; 8
-  ; 8pm
-  ; 8:30pm
 
 (define (parse/time/day)
   (parse/or
