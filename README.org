@@ -68,7 +68,7 @@
 
 ** Roadmap [18%]
 *** DONE due date parsing
-*** TODO repetition parsing
+*** DONE repetition parsing
 *** DONE duration parsing
 *** TODO data structure for items
 *** TODO raw data displaying
