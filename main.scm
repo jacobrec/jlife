@@ -3,9 +3,31 @@
   #:use-module (jlife dateparser)
   #:use-module (jlife durationparser)
   #:use-module (jlife repetitionparser)
+  #:use-module (jlife events)
   #:use-module (jlib print))
 
 
+(define (writeln x)
+  (write x)
+  (newline))
+(define (is-r x)
+  (print (todo? x))
+  (print (meeting? x))
+  (print (reminder? x))
+  (print " ")
+  x)
+(writeln (is-r (new-todo "finish this!" #f)))
+(writeln (is-r (new-meeting "standup" ((parse/time) "monday@8am") ((parse/duration) "30m"))))
+(writeln (is-r (new-reminder "dont forget" ((parse/time) "tomorrow"))))
+(writeln (has-past? (new-todo "finish this!" #t ((parse/time) "today@8am"))))
+(writeln (has-past? (new-todo "finish this!" #f ((parse/time) "tomorrow@8am"))))
+(writeln (todo-done? (new-todo "finish this!" #t ((parse/time) "today@8am"))))
+(writeln (todo-done? (new-todo "finish this!" #f ((parse/time) "tomorrow@8am"))))
+(writeln (meeting-ongoing? (new-meeting "test1"
+                                        ((parse/time) "today@3pm")
+                                        ((parse/duration) "30m"))))
+
+#;
 (parameterize ((ignore-case #t)) 
   (println ((parse/time) "tomorrow@8am"))
   (println ((parse/time) "dec8@8am"))

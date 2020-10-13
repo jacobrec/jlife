@@ -66,11 +66,11 @@
     - list of meetings :: =jlife display meetings=
     - list of reminders :: =jlife display reminders=
 
-** Roadmap [18%]
+** Roadmap [36%]
 *** DONE due date parsing
 *** DONE repetition parsing
 *** DONE duration parsing
-*** TODO data structure for items
+*** DONE data structure for items
 *** TODO raw data displaying
 *** TODO cli parsing for creation, dismissing, and removing
 *** TODO cli for managing notes

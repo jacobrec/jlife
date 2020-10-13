@@ -216,12 +216,15 @@
       (define type (car x))
       (define val (cdr x))
       (define default-hour '(7 0))
-      (case type
-        ((day-hour) (assemble-datetime (infer-date (first val)) (second val)))
-        ((date-hour) (assemble-datetime (infer-date-from-date (first val)) (second val)))
-        ((date) (assemble-datetime (infer-date-from-date val) default-hour))
-        ((day) (assemble-datetime (infer-date val) default-hour))
-        ((hour) (assemble-datetime (infer-date-from-hour val) val))))))
+      (define date
+        (case type
+          ((day-hour) (assemble-datetime (infer-date (first val)) (second val)))
+          ((date-hour) (assemble-datetime (infer-date-from-date (first val)) (second val)))
+          ((date) (assemble-datetime (infer-date-from-date val) default-hour))
+          ((day) (assemble-datetime (infer-date val) default-hour))
+          ((hour) (assemble-datetime (infer-date-from-hour val) val))))
+      (define time (date->time-utc date))
+      (time-second time))))
       
 
 
