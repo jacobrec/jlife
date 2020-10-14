@@ -7,7 +7,8 @@
   #:use-module (jlife dateparser)
   #:use-module (jlife durationparser)
   #:use-module (jlife events)
-  #:use-module (jlife repetitionparser))
+  #:use-module (jlife repetitionparser)
+  #:use-module (srfi srfi-1))
 
 ;; cli utils
 (define (option-default key default alist)
@@ -35,6 +36,44 @@
 
 (define (new-event-and-save event)
   (save-data (cons event (load-data))))
+
+(define (find-event-by-index idx)
+  (define events (load-data))
+  (cond
+   ((>= idx (length events))
+    (cons #f '()))
+   ((< idx 0)
+    (cons #f '()))
+   (else
+    (let ((i 0))
+      (define-values (matches not-matches)
+        (partition (lambda (x) (set! i (+ 1 i)) (= (- i 1) idx)) events))
+      (cons (car matches) not-matches)))))
+
+(define (find-event-by-substring str)
+  (define events (load-data))
+  (define-values (matches not-matches)
+    (partition (lambda (x)
+                 (string-contains (event-desc x) str))
+               events))
+  (if (= 1 (length matches))
+    (cons (car matches) not-matches)
+    (cons #f matches)))
+
+(define (find-event ops args)
+  ;; returns a pair, car is either the found task or false if none, or
+  ;; multiple tasks were found. cdr if car is false, is all found
+  ;; tasks, or if car is true, all not found tasks
+  (define s-str (string-join ops " "))
+  (define res
+    (if (string->number s-str)
+      (find-event-by-index (string->number s-str))
+      (find-event-by-substring s-str)))
+  (unless (car res)
+    (println "Failed to find a single event")
+    (unless (null? (cdr res))
+      (println "  Multiple events found")))
+  res)
 
 ;; cli tools
 (define (display-all ops args)
@@ -68,11 +107,11 @@
   (define event (new-reminder desc due))
   (new-event-and-save event))
 
-(define (end-task-cli ops args)
-  (println "End task"))
-
 (define (remove-event-cli ops args)
-  (println "Removing event"))
+  (define event-data (find-event ops args))
+  (define found (car event-data))
+  (define rest (cdr event-data))
+  (save-data rest))
 
 
 ;; More CLI utils
