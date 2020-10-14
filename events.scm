@@ -1,4 +1,5 @@
 (define-module (jlife events)
+  #:use-module (json)
   #:use-module (jlib parse)
   #:use-module (jlib print)
   #:use-module (srfi srfi-1)
@@ -21,7 +22,10 @@
             todo-done?
             meeting-started?
             meeting-ongoing?
-            meeting-finished?))
+            meeting-finished?
+
+            json-string->event
+            event->json-string))
 
 
 (define* (new-todo desc done? #:optional due)
@@ -63,7 +67,7 @@
        (third (third x))))
 
 (define (event-desc x)
-  (first x))
+  (second x))
 
 (define (event-notes x)
   (fourth x))
@@ -90,3 +94,34 @@
   (time>?
     (current-time)
     (make-time time-utc 0 (+ time dur))))
+
+(define (event->json-string evt)
+  (define typ (car evt))
+  (define desc (event-desc evt))
+  (define notes (event-notes evt))
+  (define time (event-time evt))
+  (define duration (event-duration evt))
+  (define repeats (event-repeats evt))
+  (scm->json-string
+   `((type . ,typ)
+     (desc . ,desc)
+     (notes . ,notes)
+     (time . ,time)
+     (duration . ,duration)
+     (repeats . ,repeats))
+   #:pretty #t))
+
+(define (json-string->event jsn)
+  (define alist-obj (json-string->scm jsn))
+  (define (aget key alist)
+    (define v (assoc key alist))
+    (if v (cdr v) #f))
+  (new-event
+   (string->symbol (aget "type" alist-obj))
+   (aget "desc" alist-obj)
+   #:when? (new-time
+              (aget "time" alist-obj)
+              #:duration (aget "duration" alist-obj)
+              #:repeats (aget "repeats" alist-obj))
+   #:notes (aget "notes" alist-obj)))
+  

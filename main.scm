@@ -27,6 +27,18 @@
                                         ((parse/time) "today@3pm")
                                         ((parse/duration) "30m"))))
 
+
+(println  (new-meeting "test1"
+                       ((parse/time) "today@3pm")
+                       ((parse/duration) "30m")))
+(println (event->json-string (new-meeting "test1"
+                                          ((parse/time) "today@3pm")
+                                          ((parse/duration) "30m"))))
+(println (json-string->event
+          (event->json-string (new-meeting "test1"
+                                           ((parse/time) "today@3pm")
+                                           ((parse/duration) "30m")))))
+
 #;
 (parameterize ((ignore-case #t)) 
   (println ((parse/time) "tomorrow@8am"))
