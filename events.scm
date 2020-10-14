@@ -28,7 +28,7 @@
             event->json-string))
 
 
-(define* (new-todo desc done? #:optional due)
+(define* (new-todo desc #:optional done? due)
   (new-event 'todo desc
              #:when? (new-time due)
              #:notes `((done . ,done?))))
