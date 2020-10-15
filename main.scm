@@ -83,7 +83,7 @@
   (cond
    ((string= "raw" (option-default "display" default args)) (display-raw data))
    ((string= "json" (option-default "display" default args)) (display-json data))
-   ((string= "list" (option-default "display" default args)) (display-list data))
+   ((string= "list" (option-default "display" default args)) (display-list data #:show-type? #t))
    ((string= "pretty" (option-default "display" default args)) (display-pretty data))
    (else (display-raw data))))
 
@@ -146,7 +146,7 @@
     '((#:str "o" "display")
       (#:str "d" "due")
       (#:str "r" "repeat")
-      (#:str "l" "duration"))))
+      (#:str "l" "duration" "for"))))
 #|
 ; Manual testing
 (define (is-r x)

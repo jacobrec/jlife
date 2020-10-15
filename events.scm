@@ -93,7 +93,7 @@
        (not (meeting-finished? meet))))
 (define (meeting-finished? meet)
   (define time (event-time meet))
-  (define dur (event-duration meet))
+  (define dur (or (event-duration meet) 0))
   (time>?
     (current-time)
     (make-time time-utc 0 (+ time dur))))
