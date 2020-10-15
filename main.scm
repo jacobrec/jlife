@@ -78,13 +78,14 @@
 
 ;; cli tools
 (define (display-all ops args)
-  (define default "pretty")
+  (define default "pretty-list")
   (define data (load-data))
   (cond
    ((string= "raw" (option-default "display" default args)) (display-raw data))
    ((string= "json" (option-default "display" default args)) (display-json data))
    ((string= "list" (option-default "display" default args)) (display-list data #:show-type? #t))
    ((string= "pretty" (option-default "display" default args)) (display-pretty data))
+   ((string= "pretty-list" (option-default "display" default args)) (display-pretty-list data))
    (else (display-raw data))))
 
 (define (display-help ops args)

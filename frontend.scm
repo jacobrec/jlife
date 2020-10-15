@@ -6,7 +6,8 @@
   #:export (display-raw
             display-json
             display-list
-            display-pretty))
+            display-pretty
+            display-pretty-list))
 
 (define (display-raw data)
   (println "'(")
@@ -54,7 +55,7 @@
     (println))
   (map display-colored-event d))
 
-(define (display-pretty d)
+(define (display-pretty-list d)
   (define (add-seconds-to-date date seconds)
     (time-utc->date (add-duration (date->time-utc date)
                                   (make-time time-duration 0 seconds))))
@@ -100,3 +101,7 @@
   (when (= 0 (count))
     (with-effect #:UNDERLINE
                  (with-foreground #:CYN (println "All done. You have nothing - JLife")))))
+
+(define (display-pretty data)
+  (println ";; TODO: make super pretty")
+  (display-raw data))
