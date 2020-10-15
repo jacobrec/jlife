@@ -66,7 +66,7 @@
     - list of meetings :: =jlife display meetings=
     - list of reminders :: =jlife display reminders=
 
-** Roadmap [66%]
+** Roadmap [69%]
 *** DONE due date parsing
 *** DONE repetition parsing
 *** DONE duration parsing
@@ -77,5 +77,6 @@
 *** TODO cli for managing notes
 *** DONE persistant storage
 *** TODO multiple boards
-*** TODO pretty displaying
+*** DONE pretty displaying
 *** TODO eventual consistancy cloud storage
+*** TODO prettier displaying

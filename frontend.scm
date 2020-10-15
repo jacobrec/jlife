@@ -73,7 +73,8 @@
   (define (display-section-if title items)
     (when (> (length items) 0)
       (with-effect #:BOLD 
-        (with-effect #:UNDERLINE (println title)))
+        (with-effect #:UNDERLINE (print title)))
+      (println)
       (display-list items #:padding pad)))
 
   (define (time-or-inf x) (or (event-time x) (inf)))
@@ -91,16 +92,20 @@
   (define pad " - ")
   (count 0)
 
-  (display-section-if "Reminders:" due-reminders)
-  (display-section-if "Todos:" todos)
-  (display-section-if "Ongoing Meeting:" ongoing-meetings)
-  (when (not (null? meetings))
-    (display-section-if "Next Meeting:" (list (car meetings))))
-  (display-section-if "Today's Meeting:" todays-meetings)
-  (display-section-if "Tomorrow's Meeting:" tomorrows-meetings)
-  (when (= 0 (count))
-    (with-effect #:UNDERLINE
-                 (with-foreground #:CYN (println "All done. You have nothing - JLife")))))
+  (in-box-double
+    (lambda ()
+      (display-section-if "Reminders:" due-reminders)
+      (display-section-if "Todos:" todos)
+      (display-section-if "Ongoing Meeting:" ongoing-meetings)
+      (when (not (null? meetings))
+        (display-section-if "Next Meeting:" (list (car meetings))))
+      (display-section-if "Today's Meeting:" todays-meetings)
+      (display-section-if "Tomorrow's Meeting:" tomorrows-meetings)
+      (when (= 0 (count))
+        (with-effect #:UNDERLINE
+                     (with-foreground #:CYN
+                                      (print "All done. You have nothing - JLife")))
+        (println)))))
 
 (define (display-pretty data)
   (println ";; TODO: make super pretty")
