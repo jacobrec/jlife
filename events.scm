@@ -77,7 +77,7 @@
 (define (has-past? x)
   (define time (event-time x))
   (and time
-    (time>?
+    (time>=?
       (current-time)
       (make-time time-utc 0 time))))
 

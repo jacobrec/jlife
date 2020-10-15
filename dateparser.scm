@@ -144,8 +144,8 @@
   (define min (date-minute today))
   (if (or (< uhour hour)
           (and (= uhour hour)  (< umin min)))
-      today
-      tomorrow))
+      tomorrow
+      today))
 
 (define (infer-date-from-date date)
   (define umonth-string (first date))

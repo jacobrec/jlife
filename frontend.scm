@@ -25,6 +25,7 @@
      (make-time time-utc 0 time))
     "~H:~M ~a, ~B ~e ~Y"))
 
+(define count (make-parameter 0))
 (define* (display-list d #:key show-type? (padding ""))
   (define (display-colored-event evt)
     (define typ (car evt))
@@ -38,6 +39,8 @@
         ((todo) #:BLU)
         ((meeting) #:MAG)
         ((reminder) #:RED)))
+    (with-foreground #:BLU (display (count)))
+    (count (+ 1 (count)))
     (with-foreground #:RST
                      (begin
                        (display padding)
@@ -58,9 +61,11 @@
   (define reminders (filter has-past? (filter reminder? data)))
   (define todos (filter todo? data))
   (define meetings (filter meeting? data))
+  (define pad " => ")
+  (count 0)
   (println "Reminders:")
-  (display-list reminders #:padding " - ")
+  (display-list reminders #:padding pad)
   (println "Todos:")
-  (display-list todos #:padding " - ")
+  (display-list todos #:padding pad)
   (println "Meetings:")
-  (display-list meetings #:padding " - "))
+  (display-list meetings #:padding pad))
