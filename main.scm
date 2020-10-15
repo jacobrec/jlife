@@ -4,6 +4,7 @@
   #:use-module (jlib print)
   #:use-module (jlife config)
   #:use-module (jlife backend)
+  #:use-module (jlife frontend)
   #:use-module (jlife dateparser)
   #:use-module (jlife durationparser)
   #:use-module (jlife events)
@@ -13,7 +14,7 @@
 ;; cli utils
 (define (option-default key default alist)
   (define v (assoc key alist))
-  (if v (cdr v) default))
+  (if (and v (cdr v)) (cdr v) default))
 
 (define (operator-default default ops)
   (if (null? ops) default
@@ -77,8 +78,14 @@
 
 ;; cli tools
 (define (display-all ops args)
-  (println "printing data")
-  (writeln (load-data)))
+  (define default "pretty")
+  (define data (load-data))
+  (cond
+   ((string= "raw" (option-default "display" default args)) (display-raw data))
+   ((string= "json" (option-default "display" default args)) (display-json data))
+   ((string= "list" (option-default "display" default args)) (display-list data))
+   ((string= "pretty" (option-default "display" default args)) (display-pretty data))
+   (else (display-raw data))))
 
 (define (display-help ops args)
   (println "Invalid usage."))
@@ -119,6 +126,7 @@
   (make-level "display"
               `(("display"  . ,display-all)
                 ("task"     . ,task-cli)
+                ("todo"     . ,task-cli)
                 ("meeting"  . ,meeting-cli)
                 ("reminder" . ,reminder-cli)
                 ("rm"       . ,remove-event-cli)

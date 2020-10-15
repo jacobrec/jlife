@@ -24,8 +24,10 @@
             meeting-ongoing?
             meeting-finished?
 
+            event->json-string
             json-string->event
-            event->json-string))
+            event-list->json-string
+            json-string->event-list))
 
 
 (define* (new-todo desc #:optional done? due)
@@ -74,9 +76,10 @@
 
 (define (has-past? x)
   (define time (event-time x))
-  (time>?
-    (current-time)
-    (make-time time-utc 0 time)))
+  (and time
+    (time>?
+      (current-time)
+      (make-time time-utc 0 time))))
 
 (define (todo-done? x)
   (and (todo? x)
@@ -95,24 +98,21 @@
     (current-time)
     (make-time time-utc 0 (+ time dur))))
 
-(define (event->json-string evt)
+(define (event->json-scm evt)
   (define typ (car evt))
   (define desc (event-desc evt))
   (define notes (event-notes evt))
   (define time (event-time evt))
   (define duration (event-duration evt))
   (define repeats (event-repeats evt))
-  (scm->json-string
-   `((type . ,typ)
-     (desc . ,desc)
-     (notes . ,notes)
-     (time . ,time)
-     (duration . ,duration)
-     (repeats . ,repeats))
-   #:pretty #t))
+  `((type . ,typ)
+    (desc . ,desc)
+    (notes . ,notes)
+    (time . ,time)
+    (duration . ,duration)
+    (repeats . ,repeats)))
 
-(define (json-string->event jsn)
-  (define alist-obj (json-string->scm jsn))
+(define (json-scm->event alist-obj)
   (define (aget key alist)
     (define v (assoc key alist))
     (if v (cdr v) #f))
@@ -125,3 +125,17 @@
               #:repeats (aget "repeats" alist-obj))
    #:notes (aget "notes" alist-obj)))
   
+
+(define (event->json-string event)
+  (scm->json-string (event->json-scm event) #:pretty #t))
+(define (json-string->event str)
+  (json-scm->event (json-string->scm str)))
+(define (event-list->json-string events)
+  (scm->json-string
+    (list->vector
+     (map event->json-scm events))
+    #:pretty #t))
+(define (json-string->event-list str)
+  (map json-scm->event
+    (vector->list
+     (json-string->scm str))))
