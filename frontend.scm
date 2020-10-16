@@ -7,7 +7,8 @@
             display-json
             display-list
             display-pretty
-            display-pretty-list))
+            display-pretty-list
+            count))
 
 (define (display-raw data)
   (println "'(")
@@ -27,7 +28,7 @@
     "~H:~M ~a, ~B ~e ~Y"))
 
 (define count (make-parameter 0))
-(define* (display-list d #:key show-type? (padding ""))
+(define* (display-list d #:key show-type? (padding "") show-count?)
   (define (display-colored-event evt)
     (define typ (car evt))
     (define desc (event-desc evt))
@@ -40,7 +41,8 @@
         ((todo) #:BLU)
         ((meeting) #:MAG)
         ((reminder) #:RED)))
-    (with-foreground #:BLU (display (count)))
+    (when show-count?
+      (with-foreground #:BLU (display (count))))
     (count (+ 1 (count)))
     (with-foreground #:RST
                      (begin

@@ -1,4 +1,6 @@
-(define-module (jlife main)
+;;;; Entry point
+;;;  The main CLI
+(define-module (jlife cli)
   #:use-module (jlib argparser)
   #:use-module (jlib parse)
   #:use-module (jlib print)
@@ -38,19 +40,6 @@
 (define (new-event-and-save event)
   (save-data (cons event (load-data))))
 
-(define (find-event-by-index idx)
-  (define events (load-data))
-  (cond
-   ((>= idx (length events))
-    (cons #f '()))
-   ((< idx 0)
-    (cons #f '()))
-   (else
-    (let ((i 0))
-      (define-values (matches not-matches)
-        (partition (lambda (x) (set! i (+ 1 i)) (= (- i 1) idx)) events))
-      (cons (car matches) not-matches)))))
-
 (define (find-event-by-substring str)
   (define events (load-data))
   (define-values (matches not-matches)
@@ -66,15 +55,33 @@
   ;; multiple tasks were found. cdr if car is false, is all found
   ;; tasks, or if car is true, all not found tasks
   (define s-str (string-join ops " "))
-  (define res
-    (if (string->number s-str)
-      (find-event-by-index (string->number s-str))
-      (find-event-by-substring s-str)))
+  (define res (find-event-by-substring s-str))
   (unless (car res)
     (println "Failed to find a single event")
     (unless (null? (cdr res))
       (println "  Multiple events found")))
   res)
+
+(define (read-number msg)
+  (println msg)
+  (let ((selected (read)))
+    (if (and (number? selected)
+             (exact? selected))
+      selected
+      (read-number msg))))
+
+(define (find-event-with-help ops args)
+  (define event-data (find-event ops args))
+  (define found (car event-data))
+  (define rest (cdr event-data))
+  (if found
+    event-data
+    (begin
+      (display-list rest #:show-type? #t #:show-count? #t #:padding " - ")
+      (let* ((num (read-number "Please select a number to narrow it down"))
+             (found (list-ref rest num))
+             (others (filter (lambda (x) (not (event=? x found))) (load-data))))
+        (cons found others)))))
 
 ;; cli tools
 (define (display-all ops args)
@@ -116,10 +123,13 @@
   (new-event-and-save event))
 
 (define (remove-event-cli ops args)
-  (define event-data (find-event ops args))
+  (define event-data (find-event-with-help ops args))
   (define found (car event-data))
   (define rest (cdr event-data))
-  (save-data rest))
+  (when found
+    (println "Removed:")
+    (display-list (list found) #:show-type? #t)
+    (save-data rest)))
 
 
 ;; More CLI utils

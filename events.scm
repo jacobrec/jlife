@@ -12,6 +12,7 @@
             meeting?
             reminder?
 
+            event=?
             event-time
             event-duration
             event-repeats
@@ -48,6 +49,26 @@
 
 (define* (new-event etype desc #:key when? notes)
   (list etype desc when? notes))
+
+
+(define (event-time=? a b)
+  (or
+   (and (boolean? a) (boolean? b))
+   (and
+    (or
+     (and (boolean? (first a)) (boolean? (first b)))
+     (= (first a) (first b)))
+    (or
+     (and (boolean? (second a)) (boolean? (second b)))
+     (= (second a) (second b)))
+    (or
+     (and (boolean? (third a)) (boolean? (third b)))
+     (= (third a) (third b))))))
+(define (event=? a b)
+  (and
+   (eq? (first a) (first b))
+   (string= (second a) (second b))
+   (event-time=? (third a) (third b))))
 
 (define (todo? x)
   (and (list? x) (eq? (car x) 'todo)))
@@ -92,7 +113,7 @@
   (and (meeting-started? meet)
        (not (meeting-finished? meet))))
 (define (meeting-finished? meet)
-  (define time (event-time meet))
+  (define time (or (event-time meet) (inf)))
   (define dur (or (event-duration meet) 0))
   (time>?
     (current-time)
