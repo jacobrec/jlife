@@ -6,6 +6,7 @@
 ;; * * * * * GUILE_LOAD_PATH=/home/jacob/guile guile /home/jacob/guile/jlife/reminder-monitor.scm
 ;;              > ~/.jlife_log.txt 2> ~/.jlife_log.err
 
+;; TODO: stop notification immediatly when removing item in jlife
 (define-module (jlife reminder-monitor)
   #:use-module (jlife backend)
   #:use-module (jlife events)
