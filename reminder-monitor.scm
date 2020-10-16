@@ -2,7 +2,10 @@
 ;;;  Intended to be run every minute will notify all messages that
 ;;;  have gone off
 ;; add the following line to crontab
-; * * * * * guile /home/jacob/guile/jlife/reminder-monitor.scm
+;;
+;; * * * * * GUILE_LOAD_PATH=/home/jacob/guile guile /home/jacob/guile/jlife/reminder-monitor.scm
+;;              > ~/.jlife_log.txt 2> ~/.jlife_log.err
+
 (define-module (jlife reminder-monitor)
   #:use-module (jlife backend)
   #:use-module (jlife events)
