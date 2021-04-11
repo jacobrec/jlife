@@ -14,7 +14,8 @@
 ;; config defaults
 (define config-defaults
   '((backend . scm)
-    (data-file . "data")))
+    (data-file . "data")
+    (pretty-upcoming-meeting-count . 5)))
 
 (define (data-file-path)
   (define config (read-config))

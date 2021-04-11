@@ -3,6 +3,7 @@
   #:use-module (jlife events)
   #:use-module (jlib print)
   #:use-module (srfi srfi-19)
+  #:use-module (srfi srfi-1)
   #:export (display-raw
             display-json
             display-list
@@ -17,9 +18,6 @@
 
 (define (display-json data)
   (println (event-list->json-string data)))
-
-(define (display-pretty data)
-  (display-raw data))
 
 (define (time->pretty-str time)
   (date->string
@@ -92,6 +90,7 @@
   (define todays-meetings (filter is-today? upcoming-meetings))
   (define tomorrows-meetings (filter is-tomorrow? upcoming-meetings))
   (define pad " - ")
+  (define upcoming-meeting-count (min (length meetings) (cdr (assoc 'pretty-upcoming-meeting-count (read-config)))))
   (count 0)
 
   (in-box-double
@@ -100,7 +99,9 @@
       (display-section-if "Todos:" todos)
       (display-section-if "Ongoing Meeting:" ongoing-meetings)
       (when (not (null? meetings))
-        (display-section-if "Next Meeting:" (list (car meetings))))
+        (cond
+          ((= upcoming-meeting-count 1) (display-section-if "Next Meeting:" (list (car meetings))))
+          ((< 1 upcoming-meeting-count) (display-section-if "Next Meetings:" (take meetings upcoming-meeting-count)))))
       (display-section-if "Today's Meeting:" todays-meetings)
       (display-section-if "Tomorrow's Meeting:" tomorrows-meetings)
       (when (= 0 (count))
@@ -108,7 +109,3 @@
                      (with-foreground #:CYN
                                       (print "All done. You have nothing - JLife")))
         (println)))))
-
-(define (display-pretty data)
-  (println ";; TODO: make super pretty")
-  (display-raw data))
