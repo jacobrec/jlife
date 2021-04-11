@@ -74,7 +74,7 @@
      (add-seconds-to-date (current-date) (* 24 60 60))))
   (define (display-section-if title items)
     (when (> (length items) 0)
-      (with-effect #:BOLD 
+      (with-effect #:BOLD
         (with-effect #:UNDERLINE (print title)))
       (println)
       (display-list items #:padding pad)))

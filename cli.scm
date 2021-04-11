@@ -85,18 +85,18 @@
 
 ;; cli tools
 (define (display-all ops args)
-  (define default "pretty-list")
+  (define default "pretty")
   (define data (load-data))
   (cond
    ((string= "raw" (option-default "display" default args)) (display-raw data))
    ((string= "json" (option-default "display" default args)) (display-json data))
    ((string= "list" (option-default "display" default args)) (display-list data #:show-type? #t))
-   ((string= "pretty" (option-default "display" default args)) (display-pretty data))
-   ((string= "pretty-list" (option-default "display" default args)) (display-pretty-list data))
+   ((string= "pretty" (option-default "display" default args)) (display-pretty-list data))
    (else (display-raw data))))
 
 (define (display-help ops args)
-  (println "Invalid usage."))
+  (println "Invalid usage.")
+  (println "try 'jlife help'"))
 
 (define (task-cli ops args)
   (define due-str (option-default "due" #f args))
@@ -131,6 +131,25 @@
     (display-list (list found) #:show-type? #t)
     (save-data rest)))
 
+(define (help-cli ops args)
+  (println "jlife:")
+  (println "  {todo|task} description of todo item [--due DATESTRING] [--repeat REPEATSTRING]")
+  (println "  meeting description of meeting [--due DATESTING] [--repeat REPEATSTRING] [--duration DURSTRING]")
+  (println "  reminder description of reminder [--due DATESTING] [--repeat REPEATSTRING]")
+  (println "  {done|rm|remove|finish|dismiss} description of item to remove")
+  (println "Options:")
+  (println "  --display {raw|list|pretty|json}")
+  (println "Formats:")
+  (println "  DATESTRING= ; ex) apr12@6pm ex) thu ex) monday@14")
+  (println "  REPEATSTRING={EVERYNREPEAT|REGULARREPEAT|SUBWEEKREPEAT}")
+  (println "  SUBWEEKREPEAT=[mon][tue][wed][thu][fri][sat][sun] ; ex) monwedfri")
+  (println "  REGULARREPEAT={daily|weekly|biweekly|monthly|yearly|anually}")
+  (println "  EVERYNREPEAT=NUMBER_EVERYITEM ; ex) 2weeks")
+  (println "  EVERYITEM={years|y|months|m|fortnights|f|weeks|w|days}")
+  (println "  DURSTRING=NUMBER_DURITEM ; ex) 3h")
+  (println "  DURITEM={weeks|w|days|d|hours|h|minutes|m|seconds|s}")
+  (println "  NUMBER=\\d+"))
+
 
 ;; More CLI utils
 (define top-level
@@ -144,12 +163,13 @@
                 ("remove"   . ,remove-event-cli)
                 ("done"     . ,remove-event-cli)
                 ("finish"   . ,remove-event-cli)
-                ("dismiss"  . ,remove-event-cli))))
+                ("dismiss"  . ,remove-event-cli)
+                ("help"     . ,help-cli))))
 
 (define (main args)
   (define ops (cdr (assoc 'anon args)))
   (define default "display")
-  (parameterize ((ignore-case #t)) 
+  (parameterize ((ignore-case #t))
     (top-level ops args)))
 
 (main
