@@ -7,12 +7,15 @@
   #:export (new-todo
             new-meeting
             new-reminder
+            new-note
 
             todo?
             meeting?
             reminder?
+            note?
 
             event=?
+            event-type
             event-time
             event-duration
             event-repeats
@@ -36,11 +39,14 @@
              #:when? (new-time due)
              #:notes `((done . ,done?))))
 
-(define (new-meeting name time length)
-  (new-event 'meeting name #:when? (new-time time #:duration length)))
+(define (new-meeting name time len)
+  (new-event 'meeting name #:when? (new-time time #:duration len)))
 
 (define (new-reminder name time)
   (new-event 'reminder name #:when? (new-time time)))
+
+(define (new-note desc)
+  (new-event 'note desc))
 
 (define* (new-time p #:key duration repeats)
   (if p
@@ -50,6 +56,9 @@
 (define* (new-event etype desc #:key when? notes)
   (list etype desc when? notes))
 
+
+(define (event-type b)
+  (car b))
 
 (define (event-time=? a b)
   (or
@@ -70,6 +79,8 @@
    (string= (second a) (second b))
    (event-time=? (third a) (third b))))
 
+(define (note? x)
+  (and (list? x) (eq? (car x) 'note)))
 (define (todo? x)
   (and (list? x) (eq? (car x) 'todo)))
 (define (reminder? x)
@@ -78,6 +89,7 @@
   (and (list? x) (eq? (car x) 'meeting)))
 
 (define (event-time x)
+
   (and (third x)
        (first (third x))))
 
@@ -145,7 +157,7 @@
               #:duration (aget "duration" alist-obj)
               #:repeats (aget "repeats" alist-obj))
    #:notes (aget "notes" alist-obj)))
-  
+
 
 (define (event->json-string event)
   (scm->json-string (event->json-scm event) #:pretty #t))

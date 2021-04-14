@@ -4,15 +4,19 @@
   #:use-module (jlib argparser)
   #:use-module (jlib parse)
   #:use-module (jlib print)
+  #:use-module (jlib shell)
   #:use-module (jlife config)
+  #:use-module (jlife profile)
   #:use-module (jlife backend)
   #:use-module (jlife frontend)
   #:use-module (jlife dateparser)
   #:use-module (jlife durationparser)
   #:use-module (jlife events)
   #:use-module (jlife repetitionparser)
-  #:use-module (srfi srfi-1))
+  #:use-module (srfi srfi-1)
+  #:use-module (ice-9 textual-ports))
 
+(define find-event-type (make-parameter #f))
 ;; cli utils
 (define (option-default key default alist)
   (define v (assoc key alist))
@@ -40,14 +44,20 @@
 (define (new-event-and-save event)
   (save-data (cons event (load-data))))
 
+(define (all-events-except target)
+  (filter (lambda (x) (not (event=? x target))) (load-data)))
+
 (define (find-event-by-substring str)
-  (define events (load-data))
+  (define data (load-data))
+  (define events (if (find-event-type)
+                     (filter (lambda (x) (eq? 'note (event-type x))) data)
+                     (filter (lambda (x) (not (eq? 'note (event-type x)))) data)))
   (define-values (matches not-matches)
     (partition (lambda (x)
                  (string-contains (event-desc x) str))
                events))
   (if (= 1 (length matches))
-    (cons (car matches) not-matches)
+    (cons (car matches) (all-events-except matches))
     (cons #f matches)))
 
 (define (find-event ops args)
@@ -80,7 +90,7 @@
       (display-list rest #:show-type? #t #:show-count? #t #:padding " - ")
       (let* ((num (read-number "Please select a number to narrow it down"))
              (found (list-ref rest num))
-             (others (filter (lambda (x) (not (event=? x found))) (load-data))))
+             (others (all-events-except found)))
         (cons found others)))))
 
 ;; cli tools
@@ -104,7 +114,6 @@
   (define desc (string-join ops " "))
   (define event (new-todo desc #f due))
   (new-event-and-save event))
-
 
 (define (meeting-cli ops args)
   (define due-str (option-default "due" #f args))
@@ -134,6 +143,7 @@
 (define (help-cli ops args)
   (println "jlife:")
   (println "  {todo|task} description of todo item [--due DATESTRING] [--repeat REPEATSTRING]")
+  (println "  notes")
   (println "  meeting description of meeting [--due DATESTING] [--repeat REPEATSTRING] [--duration DURSTRING]")
   (println "  reminder description of reminder [--due DATESTING] [--repeat REPEATSTRING]")
   (println "  {done|rm|remove|finish|dismiss} description of item to remove")
@@ -150,13 +160,88 @@
   (println "  DURITEM={weeks|w|days|d|hours|h|minutes|m|seconds|s}")
   (println "  NUMBER=\\d+"))
 
+(define (notes-display-cli ops args)
+  (define data (load-data))
+  (display-notes data))
+
+(define (notes-edit-cli ops args)
+  (parameterize ((find-event-type 'notes))
+    (let* ((event-data (find-event-with-help ops args))
+           (found (car event-data))
+           (rest (cdr event-data)))
+      (when found
+        (println "Editing Note")
+        (let* ((newdata (edit (event-desc found)))
+               (second (cdr found))
+               (second-r (cdr second))
+               (new-second (cons newdata second-r))
+               (new (cons (car found) new-second)))
+          (save-data (cons new rest)))))))
+
+(define (notes-add-cli ops args) ; TODO: use command line data as initial contents
+  (define new-data (edit))
+  (define event (new-note new-data))
+  (new-event-and-save event))
+
+(define (notes-rm-cli ops args)
+  (parameterize ((find-event-type 'notes))
+    (let* ((event-data (find-event-with-help ops args))
+           (found (car event-data))
+           (rest (cdr event-data)))
+      (when found
+        (println "Removed:")
+        (display-list (list found) #:show-type? #t)
+        (save-data rest)))))
+(define (notes-help-cli ops args)
+  (println "jlife notes")
+  (println "jlife notes edit")
+  (println "jlife notes rm")
+  (println "jlife notes add")
+  (println "jlife notes help"))
+
+(define notes-cli
+  (make-level "display"
+              `(("display"  . ,notes-display-cli)
+                ("edit"     . ,notes-edit-cli)
+                ("rm"       . ,notes-rm-cli)
+                ("add"      . ,notes-add-cli)
+                ("help"     . ,notes-help-cli))))
+
+
+(define (profile-display-cli ops args)
+  (profile-list))
+(define (profile-add-cli ops args)
+  (profile-add (car ops)))
+(define (profile-rm-cli ops args)
+  (profile-rm (car ops)))
+(define (profile-use-cli ops args)
+  (profile-use (car ops)))
+(define (profile-help-cli ops args)
+  (println "jlife profiles")
+  (println "jlife profiles use")
+  (println "jlife profiles rm")
+  (println "jlife profiles add")
+  (println "jlife profiles help"))
+
+(define profile-cli
+  (make-level "list"
+              `(("list"     . ,profile-display-cli)
+                ("add"      . ,profile-add-cli)
+                ("rm"       . ,profile-rm-cli)
+                ("use"      . ,profile-use-cli)
+                ("help"     . ,profile-help-cli))))
+
 
 ;; More CLI utils
 (define top-level
   (make-level "display"
               `(("display"  . ,display-all)
                 ("task"     . ,task-cli)
+                ("profile"  . ,profile-cli)
+                ("profiles" . ,profile-cli)
                 ("todo"     . ,task-cli)
+                ("notes"    . ,notes-cli)
+                ("note"     . ,notes-cli)
                 ("meeting"  . ,meeting-cli)
                 ("reminder" . ,reminder-cli)
                 ("rm"       . ,remove-event-cli)

@@ -9,7 +9,24 @@
             display-list
             display-pretty
             display-pretty-list
+            display-notes
             count))
+
+(define (string-take-safe str n)
+  (string-take str (min (string-length str) n)))
+(define (string-clip str n)
+  (if (> n (string-length str))
+    str
+    (string-append (string-take-safe str (- n 3)) "...")))
+
+(define (display-notes data)
+  (define notes (filter note? data))
+  (define headers (map (lambda (note)
+                         (define x (event-desc note))
+                         (define sub (string-take-safe x 120))
+                         (car (string-split sub #\newline)))
+                       notes))
+  (map (lambda (x) (println "-" x)) headers))
 
 (define (display-raw data)
   (println "'(")
@@ -29,7 +46,7 @@
 (define* (display-list d #:key show-type? (padding "") show-count?)
   (define (display-colored-event evt)
     (define typ (car evt))
-    (define desc (event-desc evt))
+    (define desc (string-clip (event-desc evt) 120))
     (define notes (event-notes evt))
     (define time (event-time evt))
     (define duration (event-duration evt))

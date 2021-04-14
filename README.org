@@ -3,13 +3,13 @@
   One CLI to do them all
 
 ** Concepts
-*** Boards
-    Boards are seperate workspaces. 
-    Eg) I might have a School board, a SPEAR board, and a Personal Board
-    
+*** Profiles
+    Profiles are seperate workspaces.
+    Eg) I might have a School profile, a SPEAR profile, and a Personal profile
+
 *** Item
     A task, reminder, or meeting
-    
+
 *** Task
     Something that gets done.
     Eg) A bug, a feature, or a todo item
@@ -19,7 +19,10 @@
 *** Meeting
     Somewhere I need to be. Has a start and duration
     Eg) Exam, meeting, game, shift
-    
+*** Note
+    Information I want to have stored
+    Eg) Health care number
+
 *** Due/Persistant
     Tasks and reminders can either have a due date, or be persistant.
     Meetings are always due. Tasks will be late after the due date,
@@ -31,12 +34,9 @@
     week can be set as repetion modes. Custom weeks might be something
     like MoWeFr, TuTh, or SaSu
 
-*** Notes
-    Any item can have notes associated with it
-    
 ** Interface
-   The idea with the cli is to be as forgiving as possible. Accept much  
-  
+   The idea with the cli is to be as forgiving as possible. Accept much
+
 ** Interface Examples
 *** New items
     =jlife task fix the stupid bug --due tomorrow@8am=
@@ -57,7 +57,7 @@
     =jlife done go to work=
     =jlife finish go to work=
     =jlife dismiss 1=
-    
+
 *** Display items
     - raw data :: =jlife display json=
     - raw data :: =jlife display sexp=
@@ -66,7 +66,19 @@
     - list of meetings :: =jlife display meetings=
     - list of reminders :: =jlife display reminders=
 
-** Roadmap [66%] [10/15]
+*** Profiles
+    - list of profiles :: =jlife profiles=
+    - add a profile :: =jlife profile add PROFILE_NAME=
+    - remove a profile :: =jlife profile rm PROFILE_NAME=
+    - use a profile :: =jlife profile use PROFILE_NAME=
+
+*** Notes
+    - list of profiles :: =jlife notes=
+    - add a profile :: =jlife notes add=
+    - remove a profile :: =jlife notes rm note data=
+    - use a profile :: =jlife notes edit note data=
+
+** Roadmap [86%] [12/14]
 *** DONE due date parsing
 *** DONE repetition parsing
 *** DONE duration parsing
@@ -75,10 +87,9 @@
 *** DONE cli parsing for displaying
 *** DONE cli parsing for creation, dismissing, and removing
 *** TODO Actually do repeating
-*** TODO cli for managing notes
 *** DONE persistant storage
-*** TODO multiple boards
+*** DONE multiple profiles
 *** DONE pretty displaying
 *** DONE Push notifications
 *** TODO eventual consistancy cloud storage
-*** TODO prettier displaying
+*** DONE prettier displaying
