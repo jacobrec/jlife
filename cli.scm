@@ -42,10 +42,14 @@
     (checker mappings)))
 
 (define (new-event-and-save event)
-  (save-data (cons event (load-data))))
+  (unless (and
+            (eq? 'note (event-type event))
+            (string= "" (event-desc event)))
+    (save-data (cons event (load-data)))))
 
 (define (all-events-except target)
-  (filter (lambda (x) (not (event=? x target))) (load-data)))
+  (define d (filter (lambda (x) (not (event=? x target))) (load-data)))
+  d)
 
 (define (find-event-by-substring str)
   (define data (load-data))
@@ -57,7 +61,7 @@
                  (string-contains (event-desc x) str))
                events))
   (if (= 1 (length matches))
-    (cons (car matches) (all-events-except matches))
+    (cons (car matches) (all-events-except (car matches)))
     (cons #f matches)))
 
 (define (find-event ops args)
@@ -88,10 +92,12 @@
     event-data
     (begin
       (display-list rest #:show-type? #t #:show-count? #t #:padding " - ")
-      (let* ((num (read-number "Please select a number to narrow it down"))
-             (found (list-ref rest num))
-             (others (all-events-except found)))
-        (cons found others)))))
+      (if (= 0 (length rest))
+        (exit 1)
+        (let* ((num (read-number "Please select a number to narrow it down"))
+               (found (list-ref rest num))
+               (others (all-events-except found)))
+          (cons found others))))))
 
 ;; cli tools
 (define (display-all ops args)
@@ -179,7 +185,7 @@
           (save-data (cons new rest)))))))
 
 (define (notes-add-cli ops args) ; TODO: use command line data as initial contents
-  (define new-data (edit))
+  (define new-data (edit (string-join ops " ")))
   (define event (new-note new-data))
   (new-event-and-save event))
 
@@ -213,7 +219,7 @@
 (define (profile-add-cli ops args)
   (profile-add (car ops)))
 (define (profile-rm-cli ops args)
-  (profile-rm (car ops)))
+  (profile-remove (car ops)))
 (define (profile-use-cli ops args)
   (profile-use (car ops)))
 (define (profile-help-cli ops args)

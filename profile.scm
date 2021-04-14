@@ -1,6 +1,7 @@
 (define-module (jlife profile)
   #:use-module (jlib print)
   #:use-module (jlib shell)
+  #:use-module (jlib strings)
   #:use-module (jlife config)
   #:use-module (jlife backend)
   #:use-module (jlife frontend)
@@ -9,8 +10,17 @@
             profile-use
             profile-list))
 
+(define jlife-dir (string-append (getenv "HOME") "/.jlife/"))
+
 (define (profile-list)
-  (println "jlife profiles list"))
+  (define d (opendir jlife-dir))
+  (define (loop)
+    (define entry (readdir d))
+    (unless (eof-object? entry)
+      (when (starts-with entry "data-")
+        (println (substring entry 5)))
+      (loop)))
+  (loop))
 
 (define (profile-add p)
   (when (has-profile p)
@@ -38,10 +48,9 @@
              (profile-path ""))))
 
 (define (profile-path p)
-  (define pre (string-append (getenv "HOME") "/.jlife/data"))
+  (define pre (string-append jlife-dir "data"))
   (if (= 0 (string-length p))
-    pre
-    (string-append pre "-" p)))
+    pre (string-append pre "-" p)))
 
 (define (has-profile p)
   (file-exists? (profile-path p)))
