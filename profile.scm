@@ -10,10 +10,8 @@
             profile-use
             profile-list))
 
-(define jlife-dir (string-append (getenv "HOME") "/.jlife/"))
-
 (define (profile-list)
-  (define d (opendir jlife-dir))
+  (define d (opendir (store-path)))
   (define (loop)
     (define entry (readdir d))
     (unless (eof-object? entry)
@@ -48,7 +46,7 @@
              (profile-path ""))))
 
 (define (profile-path p)
-  (define pre (string-append jlife-dir "data"))
+  (define pre (string-append (store-path) "data"))
   (if (= 0 (string-length p))
     pre (string-append pre "-" p)))
 

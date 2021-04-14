@@ -37,6 +37,5 @@
 
 (create-backend 'scm read write "()")
 (create-backend 'json read-json write-json "[]")
-(create-backend 'scm-to-json read write-json "()")
 
 
