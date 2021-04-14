@@ -13,7 +13,7 @@
 
 ;; config defaults
 (define config-defaults
-  '((backend . scm)
+  '((backend . json)
     (data-file . "data")
     (pretty-upcoming-meeting-count . 5)))
 

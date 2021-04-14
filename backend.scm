@@ -2,7 +2,9 @@
   #:use-module (jlib print)
   #:use-module (jlib lists)
   #:use-module (jlife config)
+  #:use-module (jlife events)
   #:use-module (srfi srfi-1)
+  #:use-module (ice-9 textual-ports)
   #:export (load-data
             save-data))
 
@@ -28,4 +30,13 @@
   (set! backends (cons (list name loader saver default)
                        backends)))
 
+(define (read-json)
+  (json-string->event-list (get-string-all (current-input-port))))
+(define (write-json data)
+  (display (event-list->json-string data)))
+
 (create-backend 'scm read write "()")
+(create-backend 'json read-json write-json "[]")
+(create-backend 'scm-to-json read write-json "()")
+
+
