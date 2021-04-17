@@ -41,11 +41,20 @@
               (checker (cdr mappings))))))
     (checker mappings)))
 
+;; TODO: diff mode add
 (define (new-event-and-save event)
   (unless (and
             (eq? 'note (event-type event))
             (string= "" (event-desc event)))
     (save-data (cons event (load-data)))))
+(define (display-delete-event-and-save event rest)
+  (when event
+    (println "Removed:")
+    (display-list (list event) #:show-type? #t)
+    (delete-event-and-save event rest)))
+;; TODO: diff mode remove
+(define (delete-event-and-save event rest)
+  (save-data rest))
 
 (define (all-events-except target)
   (define d (filter (lambda (x) (not (event=? x target))) (load-data)))
@@ -141,10 +150,7 @@
   (define event-data (find-event-with-help ops args))
   (define found (car event-data))
   (define rest (cdr event-data))
-  (when found
-    (println "Removed:")
-    (display-list (list found) #:show-type? #t)
-    (save-data rest)))
+  (delete-event-and-save found rest))
 
 (define (help-cli ops args)
   (println "jlife:")
@@ -176,13 +182,8 @@
            (found (car event-data))
            (rest (cdr event-data)))
       (when found
-        (println "Editing Note")
-        (let* ((newdata (edit (event-desc found)))
-               (second (cdr found))
-               (second-r (cdr second))
-               (new-second (cons newdata second-r))
-               (new (cons (car found) new-second)))
-          (save-data (cons new rest)))))))
+        (delete-event-and-save found rest)
+        (new-event-and-save (new-note (edit (event-desc found))))))))
 
 (define (notes-add-cli ops args) ; TODO: use command line data as initial contents
   (define new-data (edit (string-join ops " ")))
@@ -194,10 +195,7 @@
     (let* ((event-data (find-event-with-help ops args))
            (found (car event-data))
            (rest (cdr event-data)))
-      (when found
-        (println "Removed:")
-        (display-list (list found) #:show-type? #t)
-        (save-data rest)))))
+      (display-delete-event-and-save found rest))))
 (define (notes-help-cli ops args)
   (println "jlife notes")
   (println "jlife notes edit")
