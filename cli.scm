@@ -266,6 +266,6 @@
     '((#:str "o" "display")
       (#:str "d" "due")
       (#:str "r" "repeat")
-      (#:str "l" "duration" "for")))) ; TODO: extend jlib argparser to allow for aliases like this
+      (#:str "l" "duration" "for"))))
 
 ;; Manual testing - removed a whole bunch of test cases. Last in 40f9180
