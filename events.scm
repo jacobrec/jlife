@@ -21,6 +21,8 @@
             event-repeats
             event-desc
             event-notes
+            event-add-note!
+            event-remove-note!
 
             has-past?
             todo-done?
@@ -106,6 +108,12 @@
 
 (define (event-notes x)
   (fourth x))
+(define (event-add-note! x note)
+  (list-set! x 3 (cons note (event-notes x)))
+  x)
+(define (event-remove-note! x note)
+  (list-set! x 3 (assoc-remove! (event-notes x) note))
+  x)
 
 (define (has-past? x)
   (define time (event-time x))

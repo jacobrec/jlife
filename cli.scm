@@ -7,7 +7,7 @@
   #:use-module (jlib shell)
   #:use-module (jlife config)
   #:use-module (jlife profile)
-  #:use-module (jlife backend)
+  #:use-module (jlife diff-data)
   #:use-module (jlife sync)
   #:use-module (jlife frontend)
   #:use-module (jlife dateparser)
@@ -47,7 +47,7 @@
   (unless (and
             (eq? 'note (event-type event))
             (string= "" (event-desc event)))
-    (save-data (cons event (load-data)))))
+    (diff-add-event event)))
 (define (display-delete-event-and-save event rest)
   (when event
     (println "Removed:")
@@ -55,14 +55,14 @@
     (delete-event-and-save event rest)))
 ;; TODO: diff mode remove
 (define (delete-event-and-save event rest)
-  (save-data rest))
+  (diff-remove-event event))
 
 (define (all-events-except target)
-  (define d (filter (lambda (x) (not (event=? x target))) (load-data)))
+  (define d (filter (lambda (x) (not (event=? x target))) (jlife-data)))
   d)
 
 (define (find-event-by-substring str)
-  (define data (load-data))
+  (define data (jlife-data))
   (define events (if (find-event-type)
                      (filter (lambda (x) (eq? 'note (event-type x))) data)
                      (filter (lambda (x) (not (eq? 'note (event-type x)))) data)))
@@ -112,7 +112,7 @@
 ;; cli tools
 (define (display-all ops args)
   (define default "pretty")
-  (define data (load-data))
+  (define data (jlife-data))
   (cond
    ((string= "raw" (option-default "display" default args)) (display-raw data))
    ((string= "json" (option-default "display" default args)) (display-json data))
@@ -174,7 +174,7 @@
   (println "  NUMBER=\\d+"))
 
 (define (notes-display-cli ops args)
-  (define data (load-data))
+  (define data (jlife-data))
   (display-notes data))
 
 (define (notes-edit-cli ops args)

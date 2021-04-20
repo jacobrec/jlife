@@ -3,7 +3,8 @@
   #:use-module (jlib lists)
   #:export (store-path
             read-config
-            data-file-path))
+            data-file-path
+            diff-file-path))
 
 ;; stick these in jlib somewhere
 (define (mkdir-if path)
@@ -15,12 +16,18 @@
 (define config-defaults
   '((backend . json)
     (data-file . "data")
+    (diff-file . "diff")
     (pretty-upcoming-meeting-count . 5)))
 
 (define (data-file-path)
   (define config (read-config))
   (define data-file (assoc-get 'data-file config))
   (string-append (store-path) data-file))
+
+(define (diff-file-path)
+  (define config (read-config))
+  (define diff-file (assoc-get 'diff-file config))
+  (string-append (store-path) diff-file))
 
 (define (store-path)
   (define env (getenv "JLIFE_LOCATION"))
