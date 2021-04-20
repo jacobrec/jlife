@@ -242,12 +242,15 @@
   (jlife-sync-upload))
 (define (sync-upload-cli ops args)
   (jlife-sync-download))
+(define (sync-offline-cli ops args)
+  (jlife-sync-offline))
 
 (define sync-cli
   (make-level "sync"
               `(("sync"           . ,sync-sync-cli)
                 ("force-download" . ,sync-download-cli)
-                ("force-upload"   . ,sync-upload-cli))))
+                ("force-upload"   . ,sync-upload-cli)
+                ("offline"        . ,sync-offline-cli))))
 
 
 

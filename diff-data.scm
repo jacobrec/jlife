@@ -6,7 +6,8 @@
   #:use-module (srfi srfi-1)
   #:export (jlife-data
             diff-add-event
-            diff-remove-event))
+            diff-remove-event
+            diff-reset-master))
 
 (define (diff-remove? x)
   (equal? '("jdiff" . "sub") (assoc "jdiff" (event-notes x))))
@@ -38,3 +39,7 @@
     (save-diff removed-diff)))
 (define (add-diff diff)
   (save-diff (cons diff (load-diff))))
+
+(define (diff-reset-master)
+  (save-data (jlife-data))
+  (save-diff '()))
