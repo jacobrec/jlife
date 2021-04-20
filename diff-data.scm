@@ -4,6 +4,7 @@
   #:use-module (jlife config)
   #:use-module (jlife events)
   #:use-module (srfi srfi-1)
+  #:use-module (ice-9 copy-tree)
   #:export (jlife-data
             diff-add-event
             diff-remove-event
@@ -31,7 +32,7 @@
   (define diff-len (length diff))
   (define removed-diff (filter
                          (lambda (y)
-                           (not (equal? event (event-remove-note! (map (lambda (x) x) y) "jdiff"))))
+                           (not (equal? event (event-remove-note! (copy-tree y) "jdiff"))))
                          diff))
   (define removed-diff-len (length removed-diff))
   (if (= diff-len removed-diff-len)
@@ -52,7 +53,6 @@
           (map (lambda (x) (event-add-note! x '("jdiff" . "sub"))) removed)))
 
 #|;; generate-diffs-from-masters test
-(use-modules (ice-9 copy-tree))
 (println
   (equal?
     '((todo "test4" #f (("jdiff" . "add") ("done" . #f)))
