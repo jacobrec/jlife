@@ -8,6 +8,7 @@
   #:use-module (jlife config)
   #:use-module (jlife profile)
   #:use-module (jlife backend)
+  #:use-module (jlife sync)
   #:use-module (jlife frontend)
   #:use-module (jlife dateparser)
   #:use-module (jlife durationparser)
@@ -235,6 +236,20 @@
                 ("use"      . ,profile-use-cli)
                 ("help"     . ,profile-help-cli))))
 
+(define (sync-sync-cli ops args)
+  (jlife-sync))
+(define (sync-download-cli ops args)
+  (jlife-sync-upload))
+(define (sync-upload-cli ops args)
+  (jlife-sync-download))
+
+(define sync-cli
+  (make-level "sync"
+              `(("sync"           . ,sync-sync-cli)
+                ("force-download" . ,sync-download-cli)
+                ("force-upload"   . ,sync-upload-cli))))
+
+
 
 ;; More CLI utils
 (define top-level
@@ -243,6 +258,7 @@
                 ("task"     . ,task-cli)
                 ("profile"  . ,profile-cli)
                 ("profiles" . ,profile-cli)
+                ("sync"     . ,sync-cli)
                 ("todo"     . ,task-cli)
                 ("notes"    . ,notes-cli)
                 ("note"     . ,notes-cli)
