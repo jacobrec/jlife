@@ -27,10 +27,12 @@
 
 (POST "/data"
       (lambda (request body)
-        (define diff (json-string->event-list (assoc-ref body "diff")))
-        (define :uid (assoc-ref body "uid"))
+        (define jbody (json-string->scm body))
+        (define uid (assoc-get "uid" jbody))
+        (define jdata (assoc-get "data" jbody))
+        (define diff (map json-scm->event (vector->list jdata)))
         (define loc (getenv "JLIFE_LOCATION"))
-        (setenv "JLIFE_LOCATION" (string-append data-path :uid "/"))
+        (setenv "JLIFE_LOCATION" (string-append data-path uid "/"))
         (let* ((data (load-data))
                (new-data (process-diffs-on-master diff data)))
           (save-data new-data)
@@ -45,8 +47,8 @@
         (define events (map json-scm->event (vector->list data)))
         (define loc (getenv "JLIFE_LOCATION"))
         (setenv "JLIFE_LOCATION" (string-append data-path uid "/"))
-        ;(save-data new-data)
-        (writeln events)
+        (save-data events)
+        ;(writeln events)
         (setenv "JLIFE_LOCATION" loc)
         (json `((error . #f) (data . ,(event-list->json-scm events))))))
 

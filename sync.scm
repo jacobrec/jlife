@@ -34,7 +34,18 @@
 
 (define (jlife-sync)
   (println "Syncing...")
-  (get-data-from-server))
+  (define diff (load-diff))
+  (define-values (data success)
+    (http-post-json
+      (string-append "http://" server-loc "/data")
+      (scm->json-string `((data . ,(list->vector (map event->json-scm diff)))
+                          (uid . "jacob")))))
+  (define serverdata (map json-scm->event (vector->list (assoc-get "data" data))))
+  (if success
+      (begin
+        (save-data serverdata)
+        (save-diff '()))
+      (println "Syncing failed")))
 
 
 (define (jlife-sync-download)
@@ -56,8 +67,11 @@
       (scm->json-string `((data . ,(list->vector (map event->json-scm localdata)))
                           (uid . "jacob")))))
   (define serverdata (map json-scm->event (vector->list (assoc-get "data" data))))
-  (save-data serverdata)
-  (save-diff '()))
+  (if success
+      (begin
+        (save-data serverdata)
+        (save-diff '()))
+      (println "Syncing failed")))
 
 (define (jlife-sync-offline)
   (println "Syncing: Applying diff to data...")
