@@ -32,6 +32,8 @@
 
             event->json-string
             json-string->event
+            json-scm->event
+            event->json-scm
             event-list->json-scm
             event-list->json-string
             json-string->event-list))

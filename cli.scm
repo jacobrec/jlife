@@ -239,9 +239,9 @@
 (define (sync-sync-cli ops args)
   (jlife-sync))
 (define (sync-download-cli ops args)
-  (jlife-sync-upload))
-(define (sync-upload-cli ops args)
   (jlife-sync-download))
+(define (sync-upload-cli ops args)
+  (jlife-sync-upload))
 (define (sync-offline-cli ops args)
   (jlife-sync-offline))
 
