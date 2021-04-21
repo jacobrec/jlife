@@ -32,6 +32,7 @@
 
             event->json-string
             json-string->event
+            event-list->json-scm
             event-list->json-string
             json-string->event-list))
 
@@ -169,6 +170,10 @@
               #:repeats (aget "repeats" alist-obj))
    #:notes (aget "notes" alist-obj)))
 
+
+(define (event-list->json-scm events)
+  (list->vector
+    (map event->json-scm events)))
 
 (define (event->json-string event)
   (scm->json-string (event->json-scm event) #:pretty #t))

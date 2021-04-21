@@ -8,7 +8,8 @@
   #:export (jlife-data
             diff-add-event
             diff-remove-event
-            diff-reset-master))
+            diff-reset-master
+            process-diffs-on-master))
 
 (define (diff-remove? x)
   (equal? '("jdiff" . "sub") (assoc "jdiff" (event-notes x))))
@@ -20,10 +21,12 @@
     ((diff-add? diff) (cons (event-remove-note! diff "jdiff") master))
     ((diff-remove? diff) (filter (lambda (y) (not (event=? y diff))) master))
     (else (println "Error item not a diff") (values))))
+(define (process-diffs-on-master diffs master)
+  (fold process-diff-on-master master diffs))
 (define (jlife-data)
   (define master (load-data))
   (define diff (load-diff))
-  (fold process-diff-on-master master diff))
+  (process-diffs-on-master diff master))
 
 (define (diff-add-event event)
   (add-diff (event-add-note! event '("jdiff" . "add"))))
@@ -66,6 +69,18 @@
         '((todo "test4" #f (("done" . #f)))
           (todo "test2" #f (("done" . #f)))
           (todo "test3" #f (("done" . #f))))))))
+;;|#
+
+#|;; process-diff-on-master test
+(define master '((todo "test1" #f (("done" . #f)))
+                 (todo "test2" #f (("done" . #f)))
+                 (todo "test3" #f (("done" . #f)))))
+(define diff '((todo "test4" #f (("done" . #f) ("jdiff" . "add")))
+               (todo "test1" #f (("jdiff" . "sub") ("done" . #f)))))
+(define result '((todo "test4" #f (("done" . #f)))
+                 (todo "test2" #f (("done" . #f)))
+                 (todo "test3" #f (("done" . #f)))))
+(println (equal? (process-diffs-on-master (copy-tree diff) (copy-tree master)) result))
 ;;|#
 
 

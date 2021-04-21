@@ -1,16 +1,12 @@
 (define-module (jlife config)
   #:use-module (jlib print)
   #:use-module (jlib lists)
+  #:use-module (jlib files)
   #:export (store-path
             read-config
             data-file-path
             diff-file-path))
 
-;; stick these in jlib somewhere
-(define (mkdir-if path)
-  (if (file-exists? path)
-    (values)
-    (mkdir path)))
 
 ;; config defaults
 (define config-defaults
