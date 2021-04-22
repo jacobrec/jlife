@@ -78,7 +78,7 @@
     - remove a profile :: =jlife notes rm note data=
     - use a profile :: =jlife notes edit note data=
 
-** Roadmap [86%] [12/14]
+** Roadmap [92%] [13/14]
 *** DONE due date parsing
 *** DONE repetition parsing
 *** DONE duration parsing
@@ -91,5 +91,5 @@
 *** DONE multiple profiles
 *** DONE pretty displaying
 *** DONE Push notifications
-*** TODO eventual consistancy cloud storage
+*** DONE eventual consistancy cloud storage
 *** DONE prettier displaying
