@@ -278,9 +278,9 @@
 (define (main args)
   (define ops (cdr (assoc 'anon args)))
   (define default "display")
+  (jlife-sync #f)
   (parameterize ((ignore-case #t))
-    (top-level ops args))
-  (jlife-sync #f))
+    (top-level ops args)))
 
 (main
   (parseargs
