@@ -238,7 +238,7 @@
                 ("help"     . ,profile-help-cli))))
 
 (define (sync-sync-cli ops args)
-  (jlife-sync))
+  (jlife-sync #t))
 (define (sync-download-cli ops args)
   (jlife-sync-download))
 (define (sync-upload-cli ops args)
@@ -279,7 +279,8 @@
   (define ops (cdr (assoc 'anon args)))
   (define default "display")
   (parameterize ((ignore-case #t))
-    (top-level ops args)))
+    (top-level ops args))
+  (jlife-sync #f))
 
 (main
   (parseargs

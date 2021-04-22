@@ -19,12 +19,26 @@
 (define user (make-parameter ""))
 (define server-loc (make-parameter ""))
 
-(define (with-server fn)
+
+(define-macro (catch-all perr . body)
+  `(jcatch-all ,perr (lambda () ,@body)))
+(define (jcatch-all perr thunk)
+  (with-exception-handler
+    (lambda (exn)
+      (when perr
+        (format #t "Failed to connect to server\n" exn))
+      #t)
+    thunk
+    #:unwind? #t))
+
+(define (with-server print-configured-error fn)
   (define server-config (assoc-get 'server (read-config)))
   (when server-config
     (parameterize ((user (second server-config))
                    (server-loc (first server-config)))
-      (fn))))
+      (catch-all print-configured-error (fn))))
+  (when (and print-configured-error (not server-config))
+    (println "No server configured")))
 
 (define (get-data-from-server)
   (get-data-from-loc (string-append "http://" (server-loc) "/data/" (user))))
@@ -41,10 +55,11 @@
     (= 200 (response-code res))))
 
 
-(define (jlife-sync)
-  (with-server
+(define (jlife-sync with-errors)
+  (with-server with-errors
     (lambda ()
-      (println "Syncing...")
+      (when with-errors
+        (println "Syncing..."))
       (define diff (load-diff))
       (define-values (data success)
         (http-post-json
@@ -59,8 +74,9 @@
           (println "Syncing failed")))))
 
 
+
 (define (jlife-sync-download)
-  (with-server
+  (with-server #t
     (lambda ()
       (define-values (data success) (get-data-from-server))
       (println "Syncing: Replacing local contents with server...")
@@ -72,7 +88,7 @@
 
 
 (define (jlife-sync-upload)
-  (with-server
+  (with-server #t
     (lambda ()
       (println "Syncing: Replacing server contents with local...")
       (define localdata (jlife-data))
