@@ -2,6 +2,7 @@
   #:use-module (jlife config)
   #:use-module (jlife events)
   #:use-module (jlib print)
+  #:use-module (jlib lists)
   #:use-module (srfi srfi-19)
   #:use-module (srfi srfi-1)
   #:export (display-raw
@@ -110,6 +111,20 @@
   (define upcoming-meeting-count (min (length meetings) (cdr (assoc 'pretty-upcoming-meeting-count (read-config)))))
   (count 0)
 
+  (define (display-last-synced)
+    (define s (assoc-get 'server (read-config)))
+    (define (just-now? last)
+      (> (+ 5 last) (time-second (current-time))))
+    (when s
+      (with-foreground #:BRIGHT_BLK
+        (let ((last-synced (third s)))
+          (cond
+            ((not last-synced) (print "Last Synced: Never"))
+            ((just-now? last-synced) (print "Last Synced: Just now"))
+            (else (format #t "Last Synced: ~A" (time->pretty-str last-synced))))))
+      (println)))
+
+
   (in-box-double
     (lambda ()
       (display-section-if "Reminders:" due-reminders)
@@ -125,4 +140,5 @@
         (with-effect #:UNDERLINE
                      (with-foreground #:CYN
                                       (print "All done. You have nothing - JLife")))
-        (println)))))
+        (println))
+      (display-last-synced))))

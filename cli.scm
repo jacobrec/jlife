@@ -5,9 +5,11 @@
   #:use-module (jlib parse)
   #:use-module (jlib print)
   #:use-module (jlib shell)
+  #:use-module (jlib lists)
   #:use-module (jlife config)
   #:use-module (jlife profile)
-  #:use-module (jlife backend)
+  #:use-module (jlife diff-data)
+  #:use-module (jlife sync)
   #:use-module (jlife frontend)
   #:use-module (jlife dateparser)
   #:use-module (jlife durationparser)
@@ -46,7 +48,7 @@
   (unless (and
             (eq? 'note (event-type event))
             (string= "" (event-desc event)))
-    (save-data (cons event (load-data)))))
+    (diff-add-event event)))
 (define (display-delete-event-and-save event rest)
   (when event
     (println "Removed:")
@@ -54,14 +56,14 @@
     (delete-event-and-save event rest)))
 ;; TODO: diff mode remove
 (define (delete-event-and-save event rest)
-  (save-data rest))
+  (diff-remove-event event))
 
 (define (all-events-except target)
-  (define d (filter (lambda (x) (not (event=? x target))) (load-data)))
+  (define d (filter (lambda (x) (not (event=? x target))) (jlife-data)))
   d)
 
 (define (find-event-by-substring str)
-  (define data (load-data))
+  (define data (jlife-data))
   (define events (if (find-event-type)
                      (filter (lambda (x) (eq? 'note (event-type x))) data)
                      (filter (lambda (x) (not (eq? 'note (event-type x)))) data)))
@@ -111,7 +113,7 @@
 ;; cli tools
 (define (display-all ops args)
   (define default "pretty")
-  (define data (load-data))
+  (define data (jlife-data))
   (cond
    ((string= "raw" (option-default "display" default args)) (display-raw data))
    ((string= "json" (option-default "display" default args)) (display-json data))
@@ -173,7 +175,7 @@
   (println "  NUMBER=\\d+"))
 
 (define (notes-display-cli ops args)
-  (define data (load-data))
+  (define data (jlife-data))
   (display-notes data))
 
 (define (notes-edit-cli ops args)
@@ -235,6 +237,23 @@
                 ("use"      . ,profile-use-cli)
                 ("help"     . ,profile-help-cli))))
 
+(define (sync-sync-cli ops args)
+  (jlife-sync #t))
+(define (sync-download-cli ops args)
+  (jlife-sync-download))
+(define (sync-upload-cli ops args)
+  (jlife-sync-upload))
+(define (sync-offline-cli ops args)
+  (jlife-sync-offline))
+
+(define sync-cli
+  (make-level "sync"
+              `(("sync"           . ,sync-sync-cli)
+                ("force-download" . ,sync-download-cli)
+                ("force-upload"   . ,sync-upload-cli)
+                ("offline"        . ,sync-offline-cli))))
+
+
 
 ;; More CLI utils
 (define top-level
@@ -243,6 +262,7 @@
                 ("task"     . ,task-cli)
                 ("profile"  . ,profile-cli)
                 ("profiles" . ,profile-cli)
+                ("sync"     . ,sync-cli)
                 ("todo"     . ,task-cli)
                 ("notes"    . ,notes-cli)
                 ("note"     . ,notes-cli)
@@ -258,6 +278,7 @@
 (define (main args)
   (define ops (cdr (assoc 'anon args)))
   (define default "display")
+  (jlife-sync #f)
   (parameterize ((ignore-case #t))
     (top-level ops args)))
 

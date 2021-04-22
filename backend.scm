@@ -6,24 +6,33 @@
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 textual-ports)
   #:export (load-data
-            save-data))
+            load-diff
+            save-data
+            save-diff))
 
 (define backends '())
 
+
 (define (load-data)
-  (io-er with-input-from-file (lambda (back) ((first back)))))
+  (io-er with-input-from-file (lambda (back) ((first back))) (data-file-path)))
+
+(define (load-diff)
+  (io-er with-input-from-file (lambda (back) ((first back))) (diff-file-path)))
 
 (define (save-data data)
-  (io-er with-output-to-file (lambda (back) ((second back) data))))
+  (io-er with-output-to-file (lambda (back) ((second back) data)) (data-file-path)))
 
-(define (io-er manip fn)
+(define (save-diff data)
+  (io-er with-output-to-file (lambda (back) ((second back) data)) (diff-file-path)))
+
+(define (io-er manip fn file)
   (define config (read-config))
   (define back (assoc-get (assoc-get 'backend config) backends))
-  (unless (file-exists? (data-file-path))
-    (with-output-to-file (data-file-path) (lambda ()
-                                            (println (third back)))))
+  (unless (file-exists? file)
+    (with-output-to-file file (lambda ()
+                                (println (third back)))))
   (if back
-    (manip (data-file-path) (lambda () (fn back)))))
+    (manip file (lambda () (fn back)))))
 
 
 (define (create-backend name loader saver default)

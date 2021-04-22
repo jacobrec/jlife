@@ -21,6 +21,8 @@
             event-repeats
             event-desc
             event-notes
+            event-add-note!
+            event-remove-note!
 
             has-past?
             todo-done?
@@ -30,6 +32,9 @@
 
             event->json-string
             json-string->event
+            json-scm->event
+            event->json-scm
+            event-list->json-scm
             event-list->json-string
             json-string->event-list))
 
@@ -106,6 +111,15 @@
 
 (define (event-notes x)
   (fourth x))
+(define (event-add-note! x note)
+  (list-set! x 3 (if (event-notes x)
+                     (cons note (event-notes x))
+                     (cons note '())))
+  x)
+(define (event-remove-note! x note)
+  (when (event-notes x)
+    (list-set! x 3 (assoc-remove! (event-notes x) note)))
+  x)
 
 (define (has-past? x)
   (define time (event-time x))
@@ -158,6 +172,10 @@
               #:repeats (aget "repeats" alist-obj))
    #:notes (aget "notes" alist-obj)))
 
+
+(define (event-list->json-scm events)
+  (list->vector
+    (map event->json-scm events)))
 
 (define (event->json-string event)
   (scm->json-string (event->json-scm event) #:pretty #t))

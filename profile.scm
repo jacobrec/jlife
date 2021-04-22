@@ -8,7 +8,8 @@
   #:export (profile-add
             profile-remove
             profile-use
-            profile-list))
+            profile-list
+            profile-current))
 
 (define (profile-list)
   (define d (opendir (store-path)))
@@ -16,7 +17,10 @@
     (define entry (readdir d))
     (unless (eof-object? entry)
       (when (starts-with entry "data-")
-        (println (substring entry 5)))
+        (let ((prof (substring entry 5)))
+          (if (string=? (profile-current) prof)
+            (println prof)
+            (with-effect #:BOLD (println prof)))))
       (loop)))
   (loop))
 
@@ -27,6 +31,9 @@
     (println (string-append "Added profile " p))
     (call-with-output-file (profile-path p)
       (lambda (port)
+        (write '() port)))
+    (call-with-output-file (profile-diff-path p)
+      (lambda (port)
         (write '() port)))))
 
 (define (profile-rm p)
@@ -34,7 +41,8 @@
     (println (string-append "Failed to find profile " p)))
   (when (has-profile p)
     (println (string-append "Removing profile " p))
-    (delete-file (profile-path p))))
+    (delete-file (profile-path p))
+    (delete-file (profile-diff-path p))))
 
 (define (profile-use p)
   (unless (has-profile p)
@@ -42,14 +50,22 @@
   (when (has-profile p)
     (println (string-append "Using profile " p))
     (delete-file (profile-path ""))
-    (symlink (profile-path p)
-             (profile-path ""))))
+    (symlink (profile-path p) (profile-path ""))
+    (delete-file (profile-diff-path ""))
+    (symlink (profile-diff-path p) (profile-diff-path ""))))
 
 (define (profile-path p)
-  (define pre (string-append (store-path) "data"))
+  (p-path p "data"))
+(define (profile-diff-path p)
+  (p-path p "diff"))
+(define (p-path p word)
+  (define pre (string-append (store-path) word))
   (if (= 0 (string-length p))
     pre (string-append pre "-" p)))
 
 (define (has-profile p)
   (file-exists? (profile-path p)))
+
+(define (profile-current)
+  (substring (car (reverse (string-split (readlink (profile-path "")) #\/))) 5))
 
