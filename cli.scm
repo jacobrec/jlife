@@ -5,6 +5,7 @@
   #:use-module (jlib parse)
   #:use-module (jlib print)
   #:use-module (jlib shell)
+  #:use-module (jlib lists)
   #:use-module (jlife config)
   #:use-module (jlife profile)
   #:use-module (jlife diff-data)

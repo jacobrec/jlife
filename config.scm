@@ -13,7 +13,9 @@
   '((backend . json)
     (data-file . "data")
     (diff-file . "diff")
+    (server . #f) ; (server . ("localhost:8080" "jacob"))
     (pretty-upcoming-meeting-count . 5)))
+
 
 (define (data-file-path)
   (define config (read-config))

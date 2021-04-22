@@ -4,21 +4,30 @@
   #:use-module (jlife diff-data)
   #:use-module (jlife events)
   #:use-module (jlife backend)
+  #:use-module (jlife config)
   #:use-module (json)
   #:use-module (web client)
   #:use-module (web response)
   #:use-module (rnrs bytevectors)
+  #:use-module (srfi srfi-1)
 
   #:export ( jlife-sync
              jlife-sync-download
              jlife-sync-upload
              jlife-sync-offline))
 
-(define user "jacob")
-(define server-loc "localhost:8080")
+(define user (make-parameter ""))
+(define server-loc (make-parameter ""))
+
+(define (with-server fn)
+  (define server-config (assoc-get 'server (read-config)))
+  (when server-config
+    (parameterize ((user (second server-config))
+                   (server-loc (first server-config)))
+      (fn))))
 
 (define (get-data-from-server)
-  (get-data-from-loc (string-append "http://" server-loc "/data/" user)))
+  (get-data-from-loc (string-append "http://" (server-loc) "/data/" (user))))
 (define (get-data-from-loc loc)
   (define-values (res data) (http-get loc))
   (values
@@ -33,45 +42,51 @@
 
 
 (define (jlife-sync)
-  (println "Syncing...")
-  (define diff (load-diff))
-  (define-values (data success)
-    (http-post-json
-      (string-append "http://" server-loc "/data")
-      (scm->json-string `((data . ,(list->vector (map event->json-scm diff)))
-                          (uid . "jacob")))))
-  (define serverdata (map json-scm->event (vector->list (assoc-get "data" data))))
-  (if success
-      (begin
-        (save-data serverdata)
-        (save-diff '()))
-      (println "Syncing failed")))
+  (with-server
+    (lambda ()
+      (println "Syncing...")
+      (define diff (load-diff))
+      (define-values (data success)
+        (http-post-json
+          (string-append "http://" (server-loc) "/data")
+          (scm->json-string `((data . ,(list->vector (map event->json-scm diff)))
+                              (uid . ,(user))))))
+      (define serverdata (map json-scm->event (vector->list (assoc-get "data" data))))
+      (if success
+          (begin
+            (save-data serverdata)
+            (save-diff '()))
+          (println "Syncing failed")))))
 
 
 (define (jlife-sync-download)
-  (define-values (data success) (get-data-from-server))
-  (println "Syncing: Replacing local contents with server...")
-  (if success
-      (begin
-        (save-data data)
-        (save-diff '()))
-      (println "Syncing failed")))
+  (with-server
+    (lambda ()
+      (define-values (data success) (get-data-from-server))
+      (println "Syncing: Replacing local contents with server...")
+      (if success
+          (begin
+            (save-data data)
+            (save-diff '()))
+          (println "Syncing failed")))))
 
 
 (define (jlife-sync-upload)
-  (println "Syncing: Replacing server contents with local...")
-  (define localdata (jlife-data))
-  (define-values (data success)
-    (http-post-json
-      (string-append "http://" server-loc "/data-replace")
-      (scm->json-string `((data . ,(list->vector (map event->json-scm localdata)))
-                          (uid . "jacob")))))
-  (define serverdata (map json-scm->event (vector->list (assoc-get "data" data))))
-  (if success
-      (begin
-        (save-data serverdata)
-        (save-diff '()))
-      (println "Syncing failed")))
+  (with-server
+    (lambda ()
+      (println "Syncing: Replacing server contents with local...")
+      (define localdata (jlife-data))
+      (define-values (data success)
+        (http-post-json
+          (string-append "http://" (server-loc) "/data-replace")
+          (scm->json-string `((data . ,(list->vector (map event->json-scm localdata)))
+                              (uid . ,(user))))))
+      (define serverdata (map json-scm->event (vector->list (assoc-get "data" data))))
+      (if success
+          (begin
+            (save-data serverdata)
+            (save-diff '()))
+          (println "Syncing failed")))))
 
 (define (jlife-sync-offline)
   (println "Syncing: Applying diff to data...")
