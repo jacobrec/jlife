@@ -8,7 +8,8 @@
   #:export (profile-add
             profile-remove
             profile-use
-            profile-list))
+            profile-list
+            profile-current))
 
 (define (profile-list)
   (define d (opendir (store-path)))
@@ -16,7 +17,10 @@
     (define entry (readdir d))
     (unless (eof-object? entry)
       (when (starts-with entry "data-")
-        (println (substring entry 5)))
+        (let ((prof (substring entry 5)))
+          (if (string=? (profile-current) prof)
+            (println prof)
+            (with-effect #:BOLD (println prof)))))
       (loop)))
   (loop))
 
@@ -61,4 +65,7 @@
 
 (define (has-profile p)
   (file-exists? (profile-path p)))
+
+(define (profile-current)
+  (substring (car (reverse (string-split (readlink (profile-path "")) #\/))) 5))
 

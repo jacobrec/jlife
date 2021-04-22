@@ -5,11 +5,13 @@
   #:use-module (jlife events)
   #:use-module (jlife backend)
   #:use-module (jlife config)
+  #:use-module (jlife profile)
   #:use-module (json)
   #:use-module (web client)
   #:use-module (web response)
   #:use-module (rnrs bytevectors)
   #:use-module (srfi srfi-1)
+  #:use-module (ice-9 exceptions)
 
   #:export ( jlife-sync
              jlife-sync-download
@@ -25,16 +27,19 @@
 (define (jcatch-all perr thunk)
   (with-exception-handler
     (lambda (exn)
-      (when perr
-        (format #t "Failed to connect to server\n" exn))
-      #t)
+      (define is-conn-error (and (string=? "~A" (exception-message exn))
+                              (string=? (car (exception-irritants exn)) "Connection refused")))
+      (if is-conn-error
+        (when perr
+          (format #t "Failed to connect to server\n"))
+        (raise-exception exn)))
     thunk
     #:unwind? #t))
 
 (define (with-server print-configured-error fn)
   (define server-config (assoc-get 'server (read-config)))
   (when server-config
-    (parameterize ((user (second server-config))
+    (parameterize ((user (string-append (second server-config) "-" (profile-current)))
                    (server-loc (first server-config)))
       (catch-all print-configured-error (fn))))
   (when (and print-configured-error (not server-config))
@@ -54,6 +59,13 @@
     (json-string->scm (utf8->string data))
     (= 200 (response-code res))))
 
+(define (finalize-sync success data)
+  (if success
+      (begin
+        (save-data data)
+        (save-diff '())
+        (config-set-last-synced-now))
+      (println "Syncing failed")))
 
 (define (jlife-sync with-errors)
   (with-server with-errors
@@ -67,11 +79,7 @@
           (scm->json-string `((data . ,(list->vector (map event->json-scm diff)))
                               (uid . ,(user))))))
       (define serverdata (map json-scm->event (vector->list (assoc-get "data" data))))
-      (if success
-          (begin
-            (save-data serverdata)
-            (save-diff '()))
-          (println "Syncing failed")))))
+      (finalize-sync success serverdata))))
 
 
 
@@ -80,11 +88,7 @@
     (lambda ()
       (define-values (data success) (get-data-from-server))
       (println "Syncing: Replacing local contents with server...")
-      (if success
-          (begin
-            (save-data data)
-            (save-diff '()))
-          (println "Syncing failed")))))
+      (finalize-sync success data))))
 
 
 (define (jlife-sync-upload)
@@ -98,11 +102,7 @@
           (scm->json-string `((data . ,(list->vector (map event->json-scm localdata)))
                               (uid . ,(user))))))
       (define serverdata (map json-scm->event (vector->list (assoc-get "data" data))))
-      (if success
-          (begin
-            (save-data serverdata)
-            (save-diff '()))
-          (println "Syncing failed")))))
+      (finalize-sync success serverdata))))
 
 (define (jlife-sync-offline)
   (println "Syncing: Applying diff to data...")
