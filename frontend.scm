@@ -27,7 +27,9 @@
                          (define sub (string-take-safe x 120))
                          (car (string-split sub #\newline)))
                        notes))
-  (map (lambda (x) (println "-" x)) headers))
+  (if (null? notes)
+    (println "### No notes to display ###")
+    (map (lambda (x) (println "-" x)) headers)))
 
 (define (display-raw data)
   (println "'(")

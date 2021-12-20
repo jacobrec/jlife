@@ -199,11 +199,12 @@
            (rest (cdr event-data)))
       (display-delete-event-and-save found rest))))
 (define (notes-help-cli ops args)
-  (println "jlife notes")
-  (println "jlife notes edit")
-  (println "jlife notes rm")
-  (println "jlife notes add")
-  (println "jlife notes help"))
+  (println "usage:")
+  (println "  jlife notes display")
+  (println "  jlife notes edit")
+  (println "  jlife notes rm")
+  (println "  jlife notes add")
+  (println "  jlife notes help"))
 
 (define notes-cli
   (make-level "display"
